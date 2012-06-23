@@ -4,8 +4,8 @@ The Jaccia and Jacciata Cellular Automata
 Overview
 --------
 
-Jaccia and Jacciata are cellular automata inspired by the Announcement of
-[Scientific Proof that Slime Molds are Intelligent Maze Solvers]().
+Jaccia and Jacciata are cellular automata inspired by the [Announcement
+of Scientific Proof that Slime Molds are Intelligent Maze Solvers][].
 
 Basically, the slime mold solves the maze by:
 
@@ -23,7 +23,7 @@ only paths of slime cells that reach from food to food (or uninterrupted
 circular paths of slime cells) remain. Jacciata is a more involved
 automaton which finds only the shortest path.
 
-[Scientific Proof that Slime Molds are Intelligent Maze Solvers]: http://web.archive.org/web/20020220163303/http://www.riken.go.jp/lab-www/frontier-div/NEWSLETTER/feb2001/ameboid_e.htm
+[Announcement of Scientific Proof that Slime Molds are Intelligent Maze Solvers]:   http://web.archive.org/web/20020220163303/http://www.riken.go.jp/lab-www/frontier-div/NEWSLETTER/feb2001/ameboid_e.htm
 
 Properties
 ----------
