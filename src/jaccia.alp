@@ -1,9 +1,13 @@
 /*
- * The Jaccia automaton, expressed in ALPACA.
+ * The Jaccia automaton, expressed in ALPACA 1.0.
  * Inspired by the Scientific Announcement that
  *   Slime Molds are Intelligent Maze-Solvers.
  * April 11 2009, Chris Pressey, Cat's Eye Technologies.
+ * Updated to ALPACA 1.0 on March 20, 2013.
  */
+
+neighbourhood VonNeumann
+  (^ v < >);
 
 class Sustainer;
 
@@ -15,9 +19,4 @@ state Food2 "S"
    is Sustainer;
 state Slime "%"
    is Sustainer
-   to Space when not ((^ is Sustainer and > is Sustainer) or
-                      (^ is Sustainer and v is Sustainer) or
-                      (^ is Sustainer and < is Sustainer) or
-                      (> is Sustainer and v is Sustainer) or
-                      (> is Sustainer and < is Sustainer) or
-                      (v is Sustainer and < is Sustainer)).
+   to Space when not 2 in VonNeumann is Sustainer.

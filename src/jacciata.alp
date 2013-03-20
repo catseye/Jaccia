@@ -2,7 +2,11 @@
  * The Jacciata automaton, expressed in ALPACA.
  * Inspired by Jaccia.
  * April 11 2009, Chris Pressey, Cat's Eye Technologies.
+ * Updated to ALPACA 1.0 on March 20, 2013.
  */
+
+neighbourhood VonNeumann
+  (^ v < >);
 
 class Starter;
 class Sustainer;
@@ -19,20 +23,10 @@ state Wall  "#";  /* purely decorative */
  */
 state Slime "%"
    is Sustainer
-   to Space when not ((^ is Sustainer and > is Sustainer) or
-                      (^ is Sustainer and v is Sustainer) or
-                      (^ is Sustainer and < is Sustainer) or
-                      (> is Sustainer and v is Sustainer) or
-                      (> is Sustainer and < is Sustainer) or
-                      (v is Sustainer and < is Sustainer))
-                  or /* this part lets conflicts be resolved */
-                     ((^ Head and > Head) or
-                      (^ Head and v Head) or
-                      (^ Head and < Head) or
-                      (> Head and v Head) or
-                      (> Head and < Head) or
-                      (v Head and < Head)),
-   to Head when (v is Starter or ^ is Starter or > is Starter or < is Starter);
+   to Space when (not 2 in VonNeumann is Sustainer)
+                 /* this part lets conflicts be resolved */
+                 or 2 in VonNeumann Head,
+   to Head when 1 in VonNeumann is Starter;
 
 state Head "-"
    is Starter
@@ -49,13 +43,8 @@ state Head "-"
 state Body "?"
    is Starter
    is Sassy
-   to Solved when (v is Solution or ^ is Solution or > is Solution or < is Solution),
-   to Space when not ((^ is Sassy and > is Sassy) or
-                      (^ is Sassy and v is Sassy) or
-                      (^ is Sassy and < is Sassy) or
-                      (> is Sassy and v is Sassy) or
-                      (> is Sassy and < is Sassy) or
-                      (v is Sassy and < is Sassy));
+   to Solved when 1 in VonNeumann is Solution,
+   to Space when not 2 in VonNeumann is Sassy;
 
 /*
  * Solved cells survive on the same rules as body cells.
@@ -63,12 +52,7 @@ state Body "?"
 state Solved "@"
    is Sassy
    is Solution
-   to Space when not ((^ is Sassy and > is Sassy) or
-                      (^ is Sassy and v is Sassy) or
-                      (^ is Sassy and < is Sassy) or
-                      (> is Sassy and v is Sassy) or
-                      (> is Sassy and < is Sassy) or
-                      (v is Sassy and < is Sassy));
+   to Space when not 2 in VonNeumann is Sassy;
 
 state Start "S"
    is Starter
