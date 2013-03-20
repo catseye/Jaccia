@@ -30,22 +30,19 @@ Properties
 
 Jaccia has the property that, when started from this condition (entire
 maze filled with slime cells), the automaton will eventually reach a
-fixed point (steady state) which contains all possible paths from food
-to food.
+fixed point (steady state) which contains all possible orthogonal paths
+from food to food.  (Orthogonal paths means, a diagonal isn't considered
+a path.)
 
 Jacciata is similar, but has the property that when it reaches a fixed
 point, it will contain the *shortest* path from food to food, if such a
 path exists and is unique. If no such path exists, or is not unique, the
 result is undefined. It is otherwise similar to Jaccia.
 
-The behaviour of both automata is also undefined if the slime
-configurations are not orthogonal (that is, if there are any diagonal
-slime paths.)
-
 Definition
 ----------
 
-Both Jaccia and Jacciata are defined in ALPACA v0.94. Jaccia is defined
+Both Jaccia and Jacciata are defined in ALPACA v1.0. Jaccia is defined
 in the file `jaccia.alp` and Jacciata in `jacciata.alp`. The ALPACA
 definition is authoritative; what is given here is merely advisory.
 
@@ -71,10 +68,12 @@ labelled differently (`S` and `F`), there needs to be a "head" of an
 exploratory shoot that looks for solutions, and so on. It could probably
 be made more elegant with some work.
 
-The definition of these automata in ALPACA suggests some possible
-improvements to that meta-language, particularly the definition of
+[New in 1.1] The definition of these automata in ALPACA 0.94 suggested some
+possible improvements to ALPACA, particularly the definition of
 neighbourhoods different from the assumed von Neumann neighbourhood, and
-their use in the count operator.
+their use in the count operator.  The Jaccia and Jacciata descriptions were
+rewritten in ALPACA 1.0, and do now take advantage of these features in order
+to be written more succinctly.
 
 Happy intelligence! Such as it is.  
 Chris Pressey  
