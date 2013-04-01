@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <title>Jaccia Demo</title>
+</head>
+<body>
+
+<h1>Jaccia Demo</h1>
+
+<textarea id="input" rows="10">
+########S##
+#%%%%%%%%%#
+#%###%###%#
+#%#%#%%%#%#
+#%#%#%#%###
+#%%%#%#%#%#
+#####%#%#%#
+#%#%%%#%%%#
+#%#%###%###
+#%%%#%%%%%#
+#########F#
+</textarea>
+
+<pre id="output" style="border: 1px solid blue">
+</pre>
+
+<button id="start">Start</button>
+<button id="stop">Stop</button>
+<button id="step">Step</button>
+<button id="load">Load</button>
+Speed: <input id="speed" type="range" min="0" max="200" value="0" />
+
+</body>
+<script src="yoob/controller.js"></script>
+<script src="yoob/playfield.js"></script>
+<script src="../script/jaccia.js"></script>
+<script>
+  var output = document.getElementById('output');
+  var c = new yoob.Controller();
+  var pf;
+  
+  c.load = function(text) {
+      pf = new yoob.Playfield();
+      pf.setDefault('Space');
+      pf.load(0, 0, text, loadMapper);
+      output.innerHTML = pf.dump(dumpMapper);
+  };
+
+  c.step = function() {
+      var newPf = new yoob.Playfield();
+      newPf.setDefault('Space');
+      evolve_playfield(pf, newPf);
+      pf = newPf;
+      output.innerHTML = pf.dump(dumpMapper);
+  };
+
+  c.connect({
+    'start': 'start',
+    'stop': 'stop',
+    'step': 'step',
+    'load': 'load',
+    'source': 'input',
+    'speed': 'speed'
+  });
+</script>
