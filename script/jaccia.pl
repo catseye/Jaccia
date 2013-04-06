@@ -43,7 +43,7 @@ sub SustainerClassMember {
 $Appearance = {
   'Food' => 'F',
   'Food2' => 'S',
-  'Slime' => '%',
+  'Slime' => ':',
   'Space' => ' ',
   'Wall' => '#',
 
@@ -52,7 +52,7 @@ $Appearance = {
 $InputCodec = {
   'F' => 'Food',
   'S' => 'Food2',
-  '%' => 'Slime',
+  ':' => 'Slime',
   ' ' => 'Space',
   '#' => 'Wall',
 

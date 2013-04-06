@@ -4,6 +4,7 @@
  *   Slime Molds are Intelligent Maze-Solvers.
  * April 11 2009, Chris Pressey, Cat's Eye Technologies.
  * Updated to ALPACA 1.0 on March 20, 2013.
+ * Changed appearance of Slime from "%" to ":" April 6, 2013.
  */
 
 neighbourhood VonNeumann
@@ -17,6 +18,6 @@ state Food  "F"
    is Sustainer;
 state Food2 "S"
    is Sustainer;
-state Slime "%"
+state Slime ":"
    is Sustainer
    to Space when not 2 in VonNeumann is Sustainer.

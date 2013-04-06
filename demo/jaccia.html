@@ -7,28 +7,29 @@
 
 <h1>Jaccia Demo</h1>
 
+<button id="load">Load</button>
+<button id="edit">Edit</button>
+<button id="start">Start</button>
+<button id="stop">Stop</button>
+<button id="step">Step</button>
+Speed: <input id="speed" type="range" min="0" max="200" value="0" />
+
 <textarea id="input" rows="10">
 ########S##
-#%%%%%%%%%#
-#%###%###%#
-#%#%#%%%#%#
-#%#%#%#%###
-#%%%#%#%#%#
-#####%#%#%#
-#%#%%%#%%%#
-#%#%###%###
-#%%%#%%%%%#
+#:::::::::#
+#:###:###:#
+#:#:#:::#:#
+#:#:#:#:###
+#:::#:#:#:#
+#####:#:#:#
+#:#:::#:::#
+#:#:###:###
+#:::#:::::#
 #########F#
 </textarea>
 
 <pre id="output" style="border: 1px solid blue">
 </pre>
-
-<button id="start">Start</button>
-<button id="stop">Stop</button>
-<button id="step">Step</button>
-<button id="load">Load</button>
-Speed: <input id="speed" type="range" min="0" max="200" value="0" />
 
 </body>
 <script src="yoob/controller.js"></script>
@@ -59,7 +60,10 @@ Speed: <input id="speed" type="range" min="0" max="200" value="0" />
     'stop': 'stop',
     'step': 'step',
     'load': 'load',
+    'edit': 'edit',
+    'speed': 'speed',
     'source': 'input',
-    'speed': 'speed'
+    'display': 'output'
   });
+  c.click_load();
 </script>

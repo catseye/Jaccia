@@ -3,6 +3,7 @@
  * Inspired by Jaccia.
  * April 11 2009, Chris Pressey, Cat's Eye Technologies.
  * Updated to ALPACA 1.0 on March 20, 2013.
+ * Changed appearance of Slime from "%" to ":" April 6, 2013.
  */
 
 neighbourhood VonNeumann
@@ -21,7 +22,7 @@ state Wall  "#";  /* purely decorative */
  * head of an exploratory shoot) on at least two sides.  Slime turns into an
  * exploratory head if there is adjacent starter material.
  */
-state Slime "%"
+state Slime ":"
    is Sustainer
    to Space when (not 2 in VonNeumann is Sustainer)
                  /* this part lets conflicts be resolved */

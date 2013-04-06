@@ -24,14 +24,14 @@ function evolve_playfield(pf, new_pf) {
 function loadMapper(c) {
   if (c === ' ') return 'Space';
   if (c === '#') return 'Wall';
-  if (c === '%') return 'Slime';
+  if (c === ':') return 'Slime';
   if (c === 'S') return 'Food2';
   if (c === 'F') return 'Food';
 };
 function dumpMapper(s) {
   if (s === 'Space') return ' ';
   if (s === 'Wall') return '#';
-  if (s === 'Slime') return '%';
+  if (s === 'Slime') return ':';
   if (s === 'Food2') return 'S';
   if (s === 'Food') return 'F';
 };
