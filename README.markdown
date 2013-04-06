@@ -75,9 +75,10 @@ their use in the count operator.  The Jaccia and Jacciata descriptions were
 rewritten in ALPACA 1.0, and do now take advantage of these features in order
 to be written more succinctly.  (The ASCII appearance of slime mold cells was
 also changed, from the ridiculous `%` to the more aesthetically pleasing `:`.
-This actually happened a month after 1.1 was released, so should technically
-be 1.2, but this change is *so* difficult to account for and will *surely*
-break your toolchain, so I ain't gonna bother with another version bump.)
+This actually happened half a month after 1.1 was released, so should
+technically be 1.2, but this change is *so* difficult to account for and will
+*surely* break your toolchain, so I ain't gonna bother with another version
+bump.)
 
 Happy intelligence! Such as it is.  
 Chris Pressey  
