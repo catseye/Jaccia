@@ -28,23 +28,84 @@ Speed: <input id="speed" type="range" min="0" max="200" value="0" />
 #########F#
 </textarea>
 
-<pre id="output" style="border: 1px solid blue">
-</pre>
+<div id="display_container">
+  Depict with:
+  <select id="select_depiction">
+    <option>text</option>
+    <option>canvas</option>
+  </select>
+  
+  <pre id="display_text"></pre>
+  <canvas id="display_canvas" width="400" height="250">
+    There would be an HTML5 canvas here, but your browser isn't displaying it.
+  </canvas>
+</div>
 
 </body>
 <script src="yoob/controller.js"></script>
 <script src="yoob/playfield.js"></script>
+<script src="yoob/playfield-html-view.js"></script>
+<script src="yoob/playfield-canvas-view.js"></script>
 <script src="../script/jaccia.js"></script>
 <script>
-  var output = document.getElementById('output');
-  var c = new yoob.Controller();
   var pf;
-  
+
+  // Text view
+  var displayText = document.getElementById('display_text');
+  var htmlView = new yoob.PlayfieldHTMLView().init(pf, displayText);
+  htmlView.render = function(state) {
+      return dumpMapper(state);
+  };
+
+  // Canvas view
+  var displayCanvas = document.getElementById('display_canvas');
+  var colourMap = {
+      'Space': '#ffffff',
+      'Wall':  '#000000',
+      'Slime': '#00a000',
+      'Food2': '#ff0000',
+      'Food':  '#0000ff'
+  };
+  var canvasView = new yoob.PlayfieldCanvasView().init(pf, displayCanvas);
+  canvasView.drawCell = function(ctx, value, playfieldX, playfieldY,
+                                 canvasX, canvasY, cellWidth, cellHeight) {
+      ctx.fillStyle = colourMap[value] || '#ffffff';
+      ctx.fillRect(canvasX, canvasY, cellWidth, cellHeight);
+  };
+
+  // "View Manager"
+  var currentView = 'text';
+  var views = {
+      'text': htmlView,
+      'canvas': canvasView
+  };
+  var draw = function() {
+      views[currentView].pf = pf;
+      views[currentView].draw();
+  };
+
+  var selectDepiction = document.getElementById('select_depiction');
+  selectDepiction.onchange = function() {
+      var value = selectDepiction.options[selectDepiction.selectedIndex].value;
+      if (value === 'text') {
+          displayText.style.display = 'block';
+          displayCanvas.style.display = 'none';
+      } else {
+          displayText.style.display = 'none';
+          displayCanvas.style.display = 'block';
+      }
+      currentView = value;
+      draw();
+  };
+
+  // Controller.  We don't subclass, we just monkeypatch.
+  var c = new yoob.Controller();
+
   c.load = function(text) {
       pf = new yoob.Playfield();
       pf.setDefault('Space');
       pf.load(0, 0, text, loadMapper);
-      output.innerHTML = pf.dump(dumpMapper);
+      draw();
   };
 
   c.step = function() {
@@ -52,7 +113,7 @@ Speed: <input id="speed" type="range" min="0" max="200" value="0" />
       newPf.setDefault('Space');
       evolve_playfield(pf, newPf);
       pf = newPf;
-      output.innerHTML = pf.dump(dumpMapper);
+      draw();
   };
 
   c.connect({
@@ -63,7 +124,8 @@ Speed: <input id="speed" type="range" min="0" max="200" value="0" />
     'edit': 'edit',
     'speed': 'speed',
     'source': 'input',
-    'display': 'output'
+    'display': 'display_container'
   });
+  
   c.click_load();
 </script>

@@ -1,5 +1,6 @@
 /*
- * This file is part of yoob.js version 0.3-PRE
+ * This file is part of yoob.js version 0.3
+ * Available from https://github.com/catseye/yoob.js/
  * This file is in the public domain.  See http://unlicense.org/ for details.
  */
 if (window.yoob === undefined) yoob = {};
