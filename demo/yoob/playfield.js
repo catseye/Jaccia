@@ -1,5 +1,5 @@
 /*
- * This file is part of yoob.js version 0.4
+ * This file is part of yoob.js version 0.6
  * Available from https://github.com/catseye/yoob.js/
  * This file is in the public domain.  See http://unlicense.org/ for details.
  */
@@ -80,7 +80,7 @@ yoob.Playfield = function() {
         this.minX = undefined;
         this.minY = undefined;
         this.maxX = undefined;
-        this.maxX = undefined;
+        this.maxY = undefined;
 
         for (var cell in this._store) {
             var pos = cell.split(',');
@@ -101,7 +101,7 @@ yoob.Playfield = function() {
         this.minX = undefined;
         this.minY = undefined;
         this.maxX = undefined;
-        this.maxX = undefined;
+        this.maxY = undefined;
     };
 
     /*

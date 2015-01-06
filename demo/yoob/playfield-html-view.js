@@ -1,5 +1,5 @@
 /*
- * This file is part of yoob.js version 0.5
+ * This file is part of yoob.js version 0.6
  * Available from https://github.com/catseye/yoob.js/
  * This file is in the public domain.  See http://unlicense.org/ for details.
  */
@@ -19,28 +19,70 @@ yoob.PlayfieldHTMLView = function() {
     this.init = function(pf, element) {
         this.pf = pf;
         this.element = element;
+        this.cursors = [];
+        return this;
+    };
+
+    /*** Chainable setters ***/
+
+    /*
+     * Set the list of cursors to the given list of yoob.Cursor (or compatible)
+     * objects.
+     */
+    this.setCursors = function(cursors) {
+        this.cursors = cursors;
         return this;
     };
 
     /*
+     * Return the requested bounds of the occupied portion of the playfield.
+     * "Occupation" in this sense includes all cursors.
+     *
+     * These may return 'undefined' if there is nothing in the playfield.
+     *
      * Override these if you want to draw some portion of the
      * playfield which is not the whole playfield.
      */
     this.getLowerX = function() {
-        return this.pf.getMinX();
+        var minX = this.pf.getMinX();
+        for (var i = 0; i < this.cursors.length; i++) {
+            if (minX === undefined || this.cursors[i].x < minX) {
+                minX = this.cursors[i].x;
+            }
+        }
+        return minX;
     };
     this.getUpperX = function() {
-        return this.pf.getMaxX();
+        var maxX = this.pf.getMaxX();
+        for (var i = 0; i < this.cursors.length; i++) {
+            if (maxX === undefined || this.cursors[i].x > maxX) {
+                maxX = this.cursors[i].x;
+            }
+        }
+        return maxX;
     };
     this.getLowerY = function() {
-        return this.pf.getMinY();
+        var minY = this.pf.getMinY();
+        for (var i = 0; i < this.cursors.length; i++) {
+            if (minY === undefined || this.cursors[i].y < minY) {
+                minY = this.cursors[i].y;
+            }
+        }
+        return minY;
     };
     this.getUpperY = function() {
-        return this.pf.getMaxY();
+        var maxY = this.pf.getMaxY();
+        for (var i = 0; i < this.cursors.length; i++) {
+            if (maxY === undefined || this.cursors[i].y > maxY) {
+                maxY = this.cursors[i].y;
+            }
+        }
+        return maxY;
     };
 
     /*
      * Returns the number of occupied cells in the x direction.
+     * "Occupation" in this sense includes all cursors.
      */
     this.getExtentX = function() {
         if (this.getLowerX() === undefined || this.getUpperX() === undefined) {
@@ -52,6 +94,7 @@ yoob.PlayfieldHTMLView = function() {
 
     /*
      * Returns the number of occupied cells in the y direction.
+     * "Occupation" in this sense includes all cursors.
      */
     this.getExtentY = function() {
         if (this.getLowerY() === undefined || this.getUpperY() === undefined) {
@@ -76,7 +119,13 @@ yoob.PlayfieldHTMLView = function() {
         for (var y = this.getLowerY(); y <= this.getUpperY(); y++) {
             var row = "";
             for (var x = this.getLowerX(); x <= this.getUpperX(); x++) {
-                row += this.render(this.pf.get(x, y));
+                var rendered = this.render(this.pf.get(x, y));
+                for (var i = 0; i < this.cursors.length; i++) {
+                    if (this.cursors[i].x === x && this.cursors[i].y === y) {
+                        rendered = this.cursors[i].wrapText(rendered);
+                    }
+                }
+                row += rendered;
             }
             text += row + "\n";
         }
