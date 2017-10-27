@@ -2,6 +2,11 @@
 <head>
   <meta charset="utf-8">
   <title>Jacciata Demo</title>
+  <style>
+.example {
+  display: none;
+}
+  </style>
 </head>
 <body>
 
@@ -15,15 +20,9 @@
 <button id="reset">Reset</button>
 Speed: <input id="speed" type="range" min="0" max="200" value="0" />
 
-<textarea id="input" rows="10">
-####S####
-#:::::::#
-#:#####:#
-#:#:::#:#
-#:#:#:#:#
-#:::#:::#
-##F######
-</textarea>
+Starting configuration: <select id="select_source"></select>
+
+<textarea id="input" rows="10"></textarea>
 
 <div id="display_container">
   Depict with:
@@ -38,11 +37,39 @@ Speed: <input id="speed" type="range" min="0" max="200" value="0" />
   </canvas>
 </div>
 
+
+<div class="example" id="solveit"
+>########S##
+#:::::::::#
+#:###:###:#
+#:#:#:::#:#
+#:#:#:#:###
+#:::#:#:#:#
+#####:#:#:#
+#:#:::#:::#
+#:#:###:###
+#:::#:::::#
+#########F#
+</div>
+
+
+<div class="example" id="nonunique"
+>####S####
+#:::::::#
+#:#####:#
+#:#:#:#:#
+#:#:#:#:#
+#:::::::#
+####F####
+</div>
+
+
 </body>
 <script src="yoob/controller.js"></script>
 <script src="yoob/playfield.js"></script>
 <script src="yoob/playfield-html-view.js"></script>
 <script src="yoob/playfield-canvas-view.js"></script>
+<script src="yoob/preset-manager.js"></script>
 <script src="../script/jacciata.js"></script>
 <script>
   var pf;
@@ -127,6 +154,11 @@ Speed: <input id="speed" type="range" min="0" max="200" value="0" />
     'source': 'input',
     'display': 'display_container'
   });
-  
+
+  var p = (new yoob.PresetManager()).init({
+      selectElem: document.getElementById("select_source"),
+      controller: c
+  }).populateFromClass('example').select('test3');
+
   c.click_load();
 </script>
