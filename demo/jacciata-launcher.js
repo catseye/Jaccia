@@ -50,11 +50,14 @@ function launch(prefix, container, config) {
 
     // CanvasView
     var colourMap = {
-     'Space': '#ffffff',
-     'Wall':  '#000000',
-     'Slime': '#00a000',
-     'Food2': '#ff0000',
-     'Food':  '#0000ff'
+      'Space':  '#ffffff',
+      'Wall':   '#000000',
+      'Slime':  '#00a000',
+      'Solved': '#00ff40',
+      'Finish': '#0000ff',
+      'Start':  '#ff0000',
+      'Head':   '#a0c0a0',
+      'Body':   '#80a080'
     };
     var canvasView = new yoob.PlayfieldCanvasView().init({
       canvas: displayCanvas
