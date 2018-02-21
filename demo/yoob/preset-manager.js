@@ -1,5 +1,5 @@
 /*
- * This file is part of yoob.js version 0.6
+ * This file is part of yoob.js version 0.13
  * Available from https://github.com/catseye/yoob.js/
  * This file is in the public domain.  See http://unlicense.org/ for details.
  */
@@ -22,13 +22,15 @@ yoob.PresetManager = function() {
      *        will cause the .select() method of this manager to be called.
      *        it will also call .onselect if that method is present.
      *
-     *    controller: a yoob.Controller (or compatible object) that will
-     *        be informed of the selection, if no callback was supplied
-     *        when the item was added.
+     *    setPreset: (optional) a callback which will be called whenever
+     *        a new preset is selected.  If this is not given, an individual
+     *        callback must be supplied with each preset as it is added.
      */
     this.init = function(cfg) {
         this.selectElem = cfg.selectElem;
-        this.controller = cfg.controller || null;
+        if (cfg.setPreset) {
+            this.setPreset = cfg.setPreset;
+        }
         this.clear();
         var $this = this;
         this.selectElem.onchange = function() {
@@ -52,9 +54,8 @@ yoob.PresetManager = function() {
     /*
      * Adds a preset to this PresetManager.  When it is selected,
      * the given callback will be called, being passed the id as the
-     * first argument.  If no callback is provided, a default callback,
-     * which loads the contents of the element with the specified id
-     * into the configured yoob.Controller, will be used.
+     * first argument.  If no callback is provided, the default callback,
+     * configured with setPreset in the init() configuration, will be used.
      */
     this.add = function(id, callback) {
         var opt = document.createElement("option");
@@ -62,13 +63,12 @@ yoob.PresetManager = function() {
         opt.value = id;
         this.selectElem.options.add(opt);
         var $this = this;
-        this.reactTo[id] = callback || function(id) {
-            $this.controller.click_stop(); // in case it is currently running
-            $this.controller.loadSourceFromHTML(
-              document.getElementById(id).innerHTML
-            );
-        };
+        this.reactTo[id] = callback || this.setPreset;
         return this;
+    };
+
+    this.setPreset = function(id) {
+        throw new Error("No default setPreset callback configured");
     };
 
     /*
@@ -118,6 +118,27 @@ yoob.PresetManager = function() {
             var e = elements[i];
             this.add(e.id, callback);
         }
+        return this;
+    };
+
+    /*
+     * When called with a yoob.SourceManager and an array of
+     * 2-element arrays of a name and a source text, this preset
+     * manager will be populated with each source text as a
+     * named preset.  A callback to load the source text with
+     * the SourceManager will be automatically supplied.
+     */
+    this.populateFromPairs = function(sourceManager, pairs) {
+        function makeCallback(sourceText) {
+            return function(id) {
+                sourceManager.loadSource(sourceText);
+            }
+        }
+
+        for (var i = 0; i < pairs.length; i++) {
+            this.add(pairs[i][0], makeCallback(pairs[i][1]));
+        }
+        this.select(pairs[0][0]);
         return this;
     };
 };

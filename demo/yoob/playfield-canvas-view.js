@@ -1,5 +1,5 @@
 /*
- * This file is part of yoob.js version 0.6
+ * This file is part of yoob.js version 0.12
  * Available from https://github.com/catseye/yoob.js/
  * This file is in the public domain.  See http://unlicense.org/ for details.
  */
@@ -9,30 +9,40 @@ if (window.yoob === undefined) yoob = {};
  * A view (in the MVC sense) for depicting a yoob.Playfield (-compatible)
  * object on an HTML5 <canvas> element (or compatible object).
  *
- * TODO: don't necesarily resize canvas each time?
- * TODO: option to stretch content rendering to fill a fixed-size canvas
+ * drawCursorsFirst defaults to true.  This produces the pleasing visual
+ * effect of the cursor being behind the cell values, but only if the cell values
+ * themselves have transparent areas (e.g. if they're glyphs in some font.)
+ * If the cell values are solid and fill the entire cell, drawCursorsFirst: false
+ * may be in order.
+ *
+ * resizeCanvas defaults to true.  If set to false, the canvas element will
+ * not be resized before each draw.  You may wish to do this yourself in your
+ * code which calls playfieldCanvasView.draw().
+ *
  */
 yoob.PlayfieldCanvasView = function() {
-    this.init = function(pf, canvas) {
-        this.pf = pf;
-        this.canvas = canvas;
-        this.ctx = canvas.getContext('2d');
-        this.cursors = [];
-        this.fixedPosition = false;
-        this.fixedSizeCanvas = false;
-        this.drawCursorsFirst = true;
-        this.setCellDimensions(8, 8);
+    this.init = function(cfg) {
+        this.pf = cfg.playfield;
+        this.canvas = cfg.canvas;
+        this.ctx = this.canvas.getContext('2d');
+        this.fixedPosition = !!cfg.fixedPosition;
+        this.fixedSizeCanvas = !!cfg.fixedSizeCanvas;
+        this.drawCursorsFirst = (cfg.drawCursorsFirst === undefined) ? true : !!cfg.drawCursorsFirst;
+        this.setCellDimensions(cfg.cellWidth || 8, cfg.cellHeight || 8);
+        this.resizeCanvas = cfg.resizeCanvas === false ? false : true;
         return this;
     };
 
     /*** Chainable setters ***/
 
-    /*
-     * Set the list of cursors to the given list of yoob.Cursor (or compatible)
-     * objects.
-     */
-    this.setCursors = function(cursors) {
-        this.cursors = cursors;
+    this.setPlayfield = function(pf) {
+        this.pf = pf;
+        return this;
+    };
+
+    this.setCanvas = function(element) {
+        this.canvas = element;
+        this.ctx = this.canvas.getContext('2d');
         return this;
     };
 
@@ -53,76 +63,6 @@ yoob.PlayfieldCanvasView = function() {
         this.cellWidth = cellWidth;
         this.cellHeight = cellHeight;
         return this;
-    };
-
-    /*
-     * Return the requested bounds of the occupied portion of the playfield.
-     * "Occupation" in this sense includes all cursors.
-     *
-     * These may return 'undefined' if there is nothing in the playfield.
-     *
-     * Override these if you want to draw some portion of the
-     * playfield which is not the whole playfield.
-     */
-    this.getLowerX = function() {
-        var minX = this.pf.getMinX();
-        for (var i = 0; i < this.cursors.length; i++) {
-            if (minX === undefined || this.cursors[i].x < minX) {
-                minX = this.cursors[i].x;
-            }
-        }
-        return minX;
-    };
-    this.getUpperX = function() {
-        var maxX = this.pf.getMaxX();
-        for (var i = 0; i < this.cursors.length; i++) {
-            if (maxX === undefined || this.cursors[i].x > maxX) {
-                maxX = this.cursors[i].x;
-            }
-        }
-        return maxX;
-    };
-    this.getLowerY = function() {
-        var minY = this.pf.getMinY();
-        for (var i = 0; i < this.cursors.length; i++) {
-            if (minY === undefined || this.cursors[i].y < minY) {
-                minY = this.cursors[i].y;
-            }
-        }
-        return minY;
-    };
-    this.getUpperY = function() {
-        var maxY = this.pf.getMaxY();
-        for (var i = 0; i < this.cursors.length; i++) {
-            if (maxY === undefined || this.cursors[i].y > maxY) {
-                maxY = this.cursors[i].y;
-            }
-        }
-        return maxY;
-    };
-
-    /*
-     * Returns the number of occupied cells in the x direction.
-     * "Occupation" in this sense includes all cursors.
-     */
-    this.getExtentX = function() {
-        if (this.getLowerX() === undefined || this.getUpperX() === undefined) {
-            return 0;
-        } else {
-            return this.getUpperX() - this.getLowerX() + 1;
-        }
-    };
-
-    /*
-     * Returns the number of occupied cells in the y direction.
-     * "Occupation" in this sense includes all cursors.
-     */
-    this.getExtentY = function() {
-        if (this.getLowerY() === undefined || this.getUpperY() === undefined) {
-            return 0;
-        } else {
-            return this.getUpperY() - this.getLowerY() + 1;
-        }
     };
 
     /*
@@ -152,52 +92,59 @@ yoob.PlayfieldCanvasView = function() {
      *   of the entire playfield.
      */
     this.drawContext = function(ctx, offsetX, offsetY, cellWidth, cellHeight) {
-        var self = this;
-        this.pf.foreach(function (x, y, value) {
-            self.drawCell(ctx, value, x, y,
-                          offsetX + x * cellWidth, offsetY + y * cellHeight,
-                          cellWidth, cellHeight);
+        var $this = this;
+        this.pf.foreach(function(x, y, value) {
+            $this.drawCell(ctx, value, x, y,
+                           offsetX + x * cellWidth, offsetY + y * cellHeight,
+                           cellWidth, cellHeight);
         });
     };
 
+    /*
+     * Override if you like.
+     */
+    this.drawCursor = function(ctx, cursor, canvasX, canvasY, cellWidth, cellHeight) {
+        ctx.fillStyle = this.cursorFillStyle || "#50ff50";
+        ctx.fillRect(canvasX, canvasY, cellWidth, cellHeight);
+    };
+
     this.drawCursors = function(ctx, offsetX, offsetY, cellWidth, cellHeight) {
-        var cursors = this.cursors;
+        var cursors = this.pf.cursors;
         for (var i = 0; i < cursors.length; i++) {
-            cursors[i].drawContext(
-              ctx,
-              offsetX + cursors[i].x * cellWidth,
-              offsetY + cursors[i].y * cellHeight,
-              cellWidth, cellHeight
-            );
+            var cursor = cursors[i];
+            var x = offsetX + cursor.getX() * cellWidth;
+            var y = offsetY + cursor.getY() * cellHeight;
+            this.drawCursor(ctx, cursor, x, y, cellWidth, cellHeight);
         }
     };
 
     /*
      * Draw the Playfield, and its set of Cursors, on the canvas element.
-     * Resizes the canvas to the needed dimensions first.
+     * Optionally resizes the canvas to the needed dimensions first.
      */
     this.draw = function() {
         var canvas = this.canvas;
-        var ctx = canvas.getContext('2d');
         var cellWidth = this.cellWidth;
         var cellHeight = this.cellHeight;
-        var cursors = this.cursors;
 
-        var width = this.getExtentX();
-        var height = this.getExtentY();
+        var width = this.pf.getCursoredExtentX();
+        var height = this.pf.getCursoredExtentY();
 
-        canvas.width = width * cellWidth;
-        canvas.height = height * cellHeight;
+        if (this.resizeCanvas) {
+            canvas.width = width * cellWidth;
+            canvas.height = height * cellHeight;
+        }
+        var ctx = this.ctx;
 
-        this.ctx.textBaseline = "top";
-        this.ctx.font = cellHeight + "px monospace";
+        ctx.textBaseline = "top";
+        ctx.font = cellHeight + "px monospace";
 
         var offsetX = 0;
         var offsetY = 0;
 
         if (!this.fixedPosition) {
-            offsetX = (this.getLowerX() || 0) * cellWidth * -1;
-            offsetY = (this.getLowerY() || 0) * cellHeight * -1;
+            offsetX = (this.pf.getLowerX() || 0) * cellWidth * -1;
+            offsetY = (this.pf.getLowerY() || 0) * cellHeight * -1;
         }
 
         if (this.drawCursorsFirst) {

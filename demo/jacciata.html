@@ -2,163 +2,16 @@
 <head>
   <meta charset="utf-8">
   <title>Jacciata Demo</title>
-  <style>
-.example {
-  display: none;
-}
-  </style>
 </head>
 <body>
 
 <h1>Jacciata Demo</h1>
 
-<button id="load">Load</button>
-<button id="edit">Edit</button>
-<button id="start">Start</button>
-<button id="stop">Stop</button>
-<button id="step">Step</button>
-<button id="reset">Reset</button>
-Speed: <input id="speed" type="range" min="0" max="200" value="0" />
-
-Starting configuration: <select id="select_source"></select>
-
-<textarea id="input" rows="10"></textarea>
-
-<div id="display_container">
-  Depict with:
-  <select id="select_depiction">
-    <option>text</option>
-    <option>canvas</option>
-  </select>
-  
-  <pre id="display_text"></pre>
-  <canvas id="display_canvas" width="400" height="250">
-    There would be an HTML5 canvas here, but your browser isn't displaying it.
-  </canvas>
-</div>
-
-
-<div class="example" id="solveit"
->########S##
-#:::::::::#
-#:###:###:#
-#:#:#:::#:#
-#:#:#:#:###
-#:::#:#:#:#
-#####:#:#:#
-#:#:::#:::#
-#:#:###:###
-#:::#:::::#
-#########F#
-</div>
-
-
-<div class="example" id="nonunique"
->####S####
-#:::::::#
-#:#####:#
-#:#:#:#:#
-#:#:#:#:#
-#:::::::#
-####F####
-</div>
-
+<div id="container"></div>
 
 </body>
-<script src="yoob/controller.js"></script>
-<script src="yoob/playfield.js"></script>
-<script src="yoob/playfield-html-view.js"></script>
-<script src="yoob/playfield-canvas-view.js"></script>
-<script src="yoob/preset-manager.js"></script>
-<script src="../script/jacciata.js"></script>
+<script src="../eg/index.js"></script>
+<script src="jacciata-launcher.js"></script>
 <script>
-  var pf;
-
-  // Text view
-  var displayText = document.getElementById('display_text');
-  var htmlView = new yoob.PlayfieldHTMLView().init(pf, displayText);
-  htmlView.render = function(state) {
-      return dumpMapper(state);
-  };
-
-  // Canvas view
-  var displayCanvas = document.getElementById('display_canvas');
-  var colourMap = {
-      'Space':  '#ffffff',
-      'Wall':   '#000000',
-      'Slime':  '#00a000',
-      'Solved': '#00ff40',
-      'Finish': '#0000ff',
-      'Start':  '#ff0000',
-      'Head':   '#a0c0a0',
-      'Body':   '#80a080'
-  };
-  var canvasView = new yoob.PlayfieldCanvasView().init(pf, displayCanvas);
-  canvasView.drawCell = function(ctx, value, playfieldX, playfieldY,
-                                 canvasX, canvasY, cellWidth, cellHeight) {
-      ctx.fillStyle = colourMap[value] || '#ffffff';
-      ctx.fillRect(canvasX, canvasY, cellWidth, cellHeight);
-  };
-
-  // "View Manager"
-  var currentView = 'text';
-  var views = {
-      'text': htmlView,
-      'canvas': canvasView
-  };
-  var draw = function() {
-      views[currentView].pf = pf;
-      views[currentView].draw();
-  };
-
-  var selectDepiction = document.getElementById('select_depiction');
-  selectDepiction.onchange = function() {
-      var value = selectDepiction.options[selectDepiction.selectedIndex].value;
-      if (value === 'text') {
-          displayText.style.display = 'block';
-          displayCanvas.style.display = 'none';
-      } else {
-          displayText.style.display = 'none';
-          displayCanvas.style.display = 'block';
-      }
-      currentView = value;
-      draw();
-  };
-
-  // Controller.  We don't subclass, we just monkeypatch.
-  var c = new yoob.Controller();
-
-  c.load = function(text) {
-      pf = new yoob.Playfield();
-      pf.setDefault('Space');
-      pf.load(0, 0, text, loadMapper);
-      draw();
-  };
-
-  c.step = function() {
-      var newPf = new yoob.Playfield();
-      newPf.setDefault('Space');
-      evolve_playfield(pf, newPf);
-      pf = newPf;
-      draw();
-  };
-
-  c.connect({
-    'start': 'start',
-    'stop': 'stop',
-    'step': 'step',
-    'load': 'load',
-    'edit': 'edit',
-    'reset': 'reset',
-    'speed': 'speed',
-    'source': 'input',
-    'display': 'display_container'
-  });
-
-  var p = (new yoob.PresetManager()).init({
-      selectElem: document.getElementById("select_source"),
-      controller: c
-  }).populateFromClass('example').select('test3');
-
-  c.click_load();
+  launch('', 'container');
 </script>
