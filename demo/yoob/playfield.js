@@ -1,5 +1,5 @@
 /*
- * This file is part of yoob.js version 0.6
+ * This file is part of yoob.js version 0.13
  * Available from https://github.com/catseye/yoob.js/
  * This file is in the public domain.  See http://unlicense.org/ for details.
  */
@@ -9,12 +9,15 @@ if (window.yoob === undefined) yoob = {};
  * A two-dimensional Cartesian grid of values.
  */
 yoob.Playfield = function() {
-    this._store = {};
-    this.minX = undefined;
-    this.minY = undefined;
-    this.maxX = undefined;
-    this.maxY = undefined;
-    this._default = undefined;
+    this.init = function(cfg) {
+        cfg = cfg || {};
+        this._default = cfg.defaultValue;
+        this.cursors = cfg.cursors || [];
+        this.clear();
+        return this;
+    };
+
+    /*** Chainable setters ***/
 
     /*
      * Set the default value for this Playfield.  This
@@ -25,6 +28,17 @@ yoob.Playfield = function() {
         this._default = v;
         return this;
     };
+
+    /*
+     * Set the list of cursors to the given list of yoob.Cursor (or compatible)
+     * objects.
+     */
+    this.setCursors = function(cursors) {
+        this.cursors = cursors;
+        return this;
+    };
+
+    /*** Accessors, etc. ***/
 
     /*
      * Obtain the value at (x, y).  The default value will
@@ -45,6 +59,9 @@ yoob.Playfield = function() {
     this.put = function(x, y, value) {
         var key = x+','+y;
         if (value === undefined || value === this._default) {
+            // NOTE: this does not recalculate the bounds, nor
+            // will it set the bounds back to 'undefined'
+            // if the playfield is now empty.
             delete this._store[key];
             return;
         }
@@ -102,6 +119,7 @@ yoob.Playfield = function() {
         this.minY = undefined;
         this.maxX = undefined;
         this.maxY = undefined;
+        return this;
     };
 
     /*
@@ -115,7 +133,9 @@ yoob.Playfield = function() {
                     this.put(x, y, this.get(x, y - dy));
                 }
             }
-        } else { alert("scrollRectangleY(" + dy + ") notImplemented"); }
+        } else {
+            throw new Error("scrollRectangleY(" + dy + ") notImplemented");
+        }
     };
 
     this.clearRectangle = function(minX, minY, maxX, maxY) {
@@ -193,7 +213,10 @@ yoob.Playfield = function() {
      * fun is a callback which takes three parameters:
      * x, y, and value.  If this callback returns a value,
      * it is written into the Playfield at that position.
-     * This function ensures a particular order.
+     * This function ensures a particular order.  For efficiency,
+     * This function knows about the structure of the backing
+     * store, so if you override .get() or .put() in a subclass,
+     * you should also override this.
      */
     this.foreach = function(fun) {
         for (var y = this.minY; y <= this.maxY; y++) {
@@ -203,10 +226,25 @@ yoob.Playfield = function() {
                 if (value === undefined)
                     continue;
                 var result = fun(x, y, value);
+                // TODO: Playfield.UNDEFINED vs. undefined meaning "no change"?
                 if (result !== undefined) {
-                    if (result === ' ') {
-                        result = undefined;
-                    }
+                    this.put(x, y, result);
+                }
+            }
+        }
+    };
+
+    this.foreachVonNeumannNeighbour = function(x, y, fun) {
+        for (var dx = -1; dx <= 1; dx++) {
+            for (var dy = -1; dy <= 1; dy++) {
+                if (dx === 0 && dy === 0)
+                    continue;
+                var value = this.get(x + dx, y + dy);
+                if (value === undefined)
+                    continue;
+                var result = fun(x, y, value);
+                // TODO: Playfield.UNDEFINED vs. undefined meaning "no change"?
+                if (result !== undefined) {
                     this.put(x, y, result);
                 }
             }
@@ -236,7 +274,7 @@ yoob.Playfield = function() {
         if (maxDy === undefined) maxDy = 0;
         for (var y = this.minY + minDy; y <= this.maxY + maxDy; y++) {
             for (var x = this.minX + minDx; x <= this.maxX + maxDx; x++) {
-                destPf.putDirty(x, y, fun(pf, x, y));
+                destPf.putDirty(x, y, fun(this, x, y));
             }
         }
         destPf.recalculateBounds();
@@ -282,5 +320,89 @@ yoob.Playfield = function() {
         } else {
             return this.maxY - this.minY + 1;
         }
+    };
+
+    /*
+     * Return the requested bounds of the occupied portion of the playfield.
+     * "Occupation" in this sense includes all cursors.
+     *
+     * These may return 'undefined' if there is nothing in the playfield.
+     *
+     * Override these if you want to draw some portion of the
+     * playfield which is not the whole playfield.
+     */
+    this.getLowerX = function() {
+        var minX = this.getMinX();
+        for (var i = 0; i < this.cursors.length; i++) {
+            if (minX === undefined || this.cursors[i].x < minX) {
+                minX = this.cursors[i].x;
+            }
+        }
+        return minX;
+    };
+    this.getUpperX = function() {
+        var maxX = this.getMaxX();
+        for (var i = 0; i < this.cursors.length; i++) {
+            if (maxX === undefined || this.cursors[i].x > maxX) {
+                maxX = this.cursors[i].x;
+            }
+        }
+        return maxX;
+    };
+    this.getLowerY = function() {
+        var minY = this.getMinY();
+        for (var i = 0; i < this.cursors.length; i++) {
+            if (minY === undefined || this.cursors[i].y < minY) {
+                minY = this.cursors[i].y;
+            }
+        }
+        return minY;
+    };
+    this.getUpperY = function() {
+        var maxY = this.getMaxY();
+        for (var i = 0; i < this.cursors.length; i++) {
+            if (maxY === undefined || this.cursors[i].y > maxY) {
+                maxY = this.cursors[i].y;
+            }
+        }
+        return maxY;
+    };
+
+    /*
+     * Returns the number of occupied cells in the x direction.
+     * "Occupation" in this sense includes all cursors.
+     */
+    this.getCursoredExtentX = function() {
+        if (this.getLowerX() === undefined || this.getUpperX() === undefined) {
+            return 0;
+        } else {
+            return this.getUpperX() - this.getLowerX() + 1;
+        }
+    };
+
+    /*
+     * Returns the number of occupied cells in the y direction.
+     * "Occupation" in this sense includes all cursors.
+     */
+    this.getCursoredExtentY = function() {
+        if (this.getLowerY() === undefined || this.getUpperY() === undefined) {
+            return 0;
+        } else {
+            return this.getUpperY() - this.getLowerY() + 1;
+        }
+    };
+
+    /*
+     * Cursored read/write interface
+     */
+    this.read = function(index) {
+        var cursor = this.cursors[index || 0];
+        return this.get(cursor.getX(), cursor.getY());
+    };
+
+    this.write = function(value, index) {
+        var cursor = this.cursors[index || 0];
+        this.put(cursor.getX(), cursor.getY(), value);
+        return this;
     };
 };
